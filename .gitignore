@@ -1,0 +1,50 @@
+# Environment
+.env
+.venv/
+venv/
+
+# uv
+.python-version
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+
+# FAISS index store
+.index_store/
+
+# Jupyter
+notebooks/.ipynb_checkpoints/
+.ipynb_checkpoints/
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Ruff
+.ruff_cache/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# GCP credentials — never commit
+*.json
+service-account*.json
+
+# env
+.env
+.venv/
+venv/
+
+# docs
+docs/
+
+# scripts
+scripts/
