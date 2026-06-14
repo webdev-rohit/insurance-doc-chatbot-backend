@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker, Session
 from google.cloud.sql.connector import Connector, IPTypes
 from apps.core.config import settings
 
@@ -27,6 +28,15 @@ def get_engine():
     return engine
 
 engine = get_engine()
+
+SessionLocal = sessionmaker(bind=engine, autocommit=False, autoflush=False)
+
+def get_db() -> Session:
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # test the connection
 # from sqlalchemy import text

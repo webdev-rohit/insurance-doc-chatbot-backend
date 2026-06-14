@@ -18,6 +18,10 @@ dependencies = [
     "sqlalchemy>=2.0.50",
     "cloud-sql-python-connector>=1.20.3",
     "pg8000>=1.31.5",
+    "bcrypt>=5.0.0",
+    "pyjwt>=2.13.0",
+    "sendgrid>=6.12.5",
+    "pydantic[email]>=2.13.4",
 ]
 
 [dependency-groups]

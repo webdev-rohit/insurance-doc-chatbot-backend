@@ -26,4 +26,15 @@ class Settings(BaseSettings):
     db_user: str
     db_password: str
 
+    # Auth settings
+    algorithm: str
+    secret_key: str
+    access_token_expire_minutes: int
+    verify_token_expire_hours: int
+    reset_token_expire_minutes: int
+
+    # Email (SendGrid) settings
+    sendgrid_api_key: str
+    from_email: str
+
 settings = Settings()
