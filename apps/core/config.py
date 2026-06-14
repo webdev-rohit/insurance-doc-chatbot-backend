@@ -17,4 +17,13 @@ class Settings(BaseSettings):
     # CORS
     cors_origins: list[str]
 
+    # GCP settings
+    project_id: str
+    region: str
+    instance_id: str
+    # DB -
+    db_name: str
+    db_user: str
+    db_password: str
+
 settings = Settings()
