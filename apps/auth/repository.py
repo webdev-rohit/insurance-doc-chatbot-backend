@@ -8,9 +8,11 @@ class AuthRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_user(self, email: str, password_hash: str):
+    def create_user(self, email: str, first_name: str, last_name: str, password_hash: str):
         stmt = insert(User).values(
             email=email,
+            first_name=first_name,
+            last_name=last_name,
             password_hash=password_hash,
             is_verified=False
         ).returning(User)

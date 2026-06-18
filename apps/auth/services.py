@@ -12,13 +12,13 @@ class AuthService:
         self.repo = AuthRepository(db)
         self.db = db
 
-    def register(self, email: str, password: str):
+    def register(self, email: str, first_name: str, last_name: str, password: str):
         existing = self.repo.get_user_by_email(email)
         if existing:
             raise HTTPException(status_code=400, detail="Email already registered")
 
         password_hash = hash_password(password)
-        self.repo.create_user(email, password_hash)
+        self.repo.create_user(email, first_name, last_name, password_hash)
         self.db.commit()  
 
         token = create_token(
