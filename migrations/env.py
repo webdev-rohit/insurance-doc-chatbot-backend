@@ -9,6 +9,7 @@ from apps.core.database import get_engine
 # Import all model modules so their tables are registered on Base.metadata.
 # Add a new import here whenever you create a new models.py file.
 import apps.auth.models  # noqa: F401
+import apps.ingestion.models  # noqa: F401
 
 config = context.config
 
