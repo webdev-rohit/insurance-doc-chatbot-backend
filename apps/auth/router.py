@@ -16,7 +16,7 @@ router = APIRouter(prefix="/auth", tags=["authentication"])
 
 @router.post("/register", response_model=RegisterResponse)
 async def register(request: RegisterRequest, db: Session = Depends(get_db)):
-    return AuthService(db).register(request.email, request.password)
+    return AuthService(db).register(request.email, request.first_name, request.last_name, request.password)
 
 @router.post("/verify-email", response_model=VerifyEmailResponse)
 async def verify_email(request: VerifyEmailRequest, db: Session = Depends(get_db)):

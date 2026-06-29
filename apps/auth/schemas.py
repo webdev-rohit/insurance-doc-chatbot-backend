@@ -14,9 +14,30 @@ def _validate_password(v: str) -> str:
 
 # ── Request schemas ──────────────────────────────────────────────────────────
 
+def _validate_name(v: str, field: str) -> str:
+    v = v.strip()
+    if not v:
+        raise ValueError(f"{field} cannot be empty")
+    if not re.fullmatch(r"[A-Za-z\s'\-]+", v):
+        raise ValueError(f"{field} must contain only letters, spaces, hyphens, or apostrophes")
+    return v
+
+
 class RegisterRequest(BaseModel):
     email: EmailStr = Field(..., example="john.doe@example.com")
+    first_name: str = Field(..., min_length=1, max_length=100, example="John")
+    last_name: str = Field(..., min_length=1, max_length=100, example="Doe")
     password: str = Field(..., example="secure_password1")
+
+    @field_validator("first_name")
+    @classmethod
+    def validate_first_name(cls, v):
+        return _validate_name(v, "First name")
+
+    @field_validator("last_name")
+    @classmethod
+    def validate_last_name(cls, v):
+        return _validate_name(v, "Last name")
 
     @field_validator("password")
     @classmethod

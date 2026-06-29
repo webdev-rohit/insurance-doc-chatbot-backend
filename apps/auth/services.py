@@ -4,6 +4,7 @@ from fastapi import HTTPException
 
 from .repository import AuthRepository
 from apps.core.config import settings
+from apps.core.global_utils import logOperation
 from .utils import hash_password, verify_password, create_token, decode_token, send_email
 
 
@@ -12,13 +13,14 @@ class AuthService:
         self.repo = AuthRepository(db)
         self.db = db
 
-    def register(self, email: str, password: str):
+    @logOperation
+    def register(self, email: str, first_name: str, last_name: str, password: str):
         existing = self.repo.get_user_by_email(email)
         if existing:
             raise HTTPException(status_code=400, detail="Email already registered")
 
         password_hash = hash_password(password)
-        self.repo.create_user(email, password_hash)
+        self.repo.create_user(email, first_name, last_name, password_hash)
         self.db.commit()  
 
         token = create_token(
@@ -33,6 +35,7 @@ class AuthService:
 
         return {"message": "Registered successfully. Check email to verify.", "verify_token": token}
 
+    @logOperation
     def verify_email(self, token: str):
         payload = decode_token(token)
         if payload.get("type") != "verify":
@@ -48,6 +51,7 @@ class AuthService:
         self.db.commit()
         return {"message": "Email verified successfully"}
 
+    @logOperation
     def login(self, email: str, password: str):
         user = self.repo.get_user_by_email(email)
         if not user:
@@ -66,6 +70,7 @@ class AuthService:
         )
         return {"access_token": token, "token_type": "bearer"}
 
+    @logOperation
     def forgot_password(self, email: str):
         user = self.repo.get_user_by_email(email)
         if not user:
@@ -83,6 +88,7 @@ class AuthService:
 
         return {"message": "Password reset link sent.", "reset_token": token}
 
+    @logOperation
     def reset_password(self, token: str, new_password: str):
         payload = decode_token(token)
         if payload.get("type") != "reset":

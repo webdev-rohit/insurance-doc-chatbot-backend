@@ -1,31 +1,19 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.openapi.utils import get_openapi
 import uvicorn
 
 from apps.core.config import settings
 from apps.auth.router import router as auth_router
+from apps.ingestion.router import router as ingestion_router
 
 app = FastAPI(
     title=settings.app_name,
     version="0.1.0"
 )
 
-# Custom OpenAPI schema to include JWT Bearer authentication
-def custom_openapi():
-    if app.openapi_schema:
-        return app.openapi_schema
-    schema = get_openapi(title=app.title, version=app.version, routes=app.routes)
-    schema.setdefault("components", {})["securitySchemes"] = {
-        "BearerAuth": {"type": "http", "scheme": "bearer", "bearerFormat": "JWT"}
-    }
-    app.openapi_schema = schema
-    return schema
-
-app.openapi = custom_openapi
-
-# Import and include auth router
+# Include the imported routers
 app.include_router(auth_router)
+app.include_router(ingestion_router)
 
 # Add CORS middleware; origins from settings (env CORS_ORIGINS, comma-separated)
 app.add_middleware(

@@ -15,6 +15,14 @@ dependencies = [
     "bcrypt>=5.0.0",
     "pyjwt>=2.13.0",
     "sendgrid>=6.12.5",
+    "google-adk>=2.2.0",
+    "docling>=2.103.0",
+    "pymupdf>=1.27.2.3",
+    "pdfplumber>=0.11.10",
+    "alembic>=1.13.0",
+    "google-cloud-storage>=2.18.0",
+    "pgvector>=0.3.0",
+    "google-cloud-aiplatform>=1.158.0",
 ]
 
 [dependency-groups]

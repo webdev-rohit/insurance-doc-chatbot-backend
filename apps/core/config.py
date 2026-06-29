@@ -37,4 +37,17 @@ class Settings(BaseSettings):
     sendgrid_api_key: str
     from_email: str
 
+    # GCS storage
+    gcs_bucket_name: str
+
+    # Vertex AI
+    embedding_model_name: str
+    embedding_output_dimensionality: int
+    embedding_batch_size: int
+
+    # PDF file input settings
+    allowed_content_types: set[str]
+    allowed_content_extensions: set[str]
+    max_file_size_bytes: int
+
 settings = Settings()
