@@ -23,6 +23,11 @@ class IngestionRepository:
             select(Ingestion).where(Ingestion.id == ingestion_id)
         ).scalar_one_or_none()
 
+    def get_latest_ingestion_by_user_id(self, user_id: UUID) -> Ingestion | None:
+        return self.db.execute(
+            select(Ingestion).where(Ingestion.user_id == user_id).order_by(Ingestion.created_at.desc()).limit(1)
+        ).scalar_one_or_none()
+
     def update(self, record: Ingestion, **kwargs) -> Ingestion:
         for key, value in kwargs.items():
             setattr(record, key, value)

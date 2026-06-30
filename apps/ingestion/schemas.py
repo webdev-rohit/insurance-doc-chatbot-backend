@@ -25,3 +25,8 @@ class IngestionResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+class IngestionStatusResponse(BaseModel):
+    id: UUID
+    status: IngestionStatus
+    error_message: Optional[str] = None

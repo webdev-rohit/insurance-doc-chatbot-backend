@@ -369,6 +369,29 @@ class IngestionService:
             status=IngestionStatus.PENDING,
         )
         return record, user.email
+    
+    @logOperation
+    def get_ingestion_record_by_id(
+        self, ingestion_id: str, user_id: str
+    ) -> Optional[Ingestion]:
+        """
+        Fetch a specific ingestion record by ID for the given user.
+        Returns None if not found or not owned by the user.
+        """
+        record = self.repo.get_by_id(ingestion_id)
+        if record and str(record.user_id) == user_id:
+            return record
+        return None
+    
+    @logOperation
+    def get_latest_ingestion_record(
+        self, user_id: str
+    ) -> Optional[Ingestion]:
+        """
+        Fetch the latest ingestion record for the given user.
+        Returns None if no record is found.
+        """
+        return self.repo.get_latest_ingestion_by_user_id(user_id)
 
     # ── background pipeline ───────────────────────────────────────────────────
 
