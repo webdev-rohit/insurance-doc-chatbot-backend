@@ -54,10 +54,13 @@ async def get_ingestion_status(
     ingestion_id: str|None = Query(None, description="The ID of the ingestion record to check the status of")
 ):
     try:
-        record = IngestionService(db).get_ingestion_record_by_id(ingestion_id, user_id)
+        if not ingestion_id:
+            record = IngestionService(db).get_latest_ingestion_record(user_id)
+        else:
+            record = IngestionService(db).get_ingestion_record_by_id(ingestion_id, user_id)
 
         if not record:
-            record = IngestionService(db).get_latest_ingestion_record(user_id)
+            raise HTTPException(status_code=404, detail="No ingestion record found for the user")
 
         return IngestionStatusResponse(
             id=record.id,
@@ -65,5 +68,45 @@ async def get_ingestion_status(
             error_message=record.error_message,
         )
     
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/show", response_model=list[IngestionResponse])
+async def show_ingestion_record(
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user),
+    ingestion_id: str|None = Query(None, description="The ID of the ingestion record to check the status of")
+):
+    try:
+        if not ingestion_id:
+            records = IngestionService(db).fetch_all_ingestion_records(user_id)
+            if not records:
+                raise HTTPException(status_code=404, detail="No ingestion records found for the user")
+            return [
+                    IngestionResponse(
+                        id=r.id,
+                        file_url=r.file_url,
+                        json_url=r.json_url,
+                        status=r.status,
+                        chunk_count=r.chunk_count,
+                        created_at=r.created_at,
+                    )
+                    for r in records
+                ]
+
+        record = IngestionService(db).get_ingestion_record_by_id(ingestion_id, user_id)
+        if not record:
+            raise HTTPException(status_code=404, detail="No ingestion record found for the user")
+        return [
+                IngestionResponse(
+                    id=record.id,
+                    file_url=record.file_url,
+                    json_url=record.json_url,
+                    status=record.status,
+                    chunk_count=record.chunk_count,
+                    created_at=record.created_at,
+                )
+            ]
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

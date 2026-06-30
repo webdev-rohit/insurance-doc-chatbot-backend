@@ -392,6 +392,16 @@ class IngestionService:
         Returns None if no record is found.
         """
         return self.repo.get_latest_ingestion_by_user_id(user_id)
+    
+    @logOperation
+    def fetch_all_ingestion_records(
+        self, user_id: str
+    ) -> Optional[Ingestion]:
+        """
+        Fetch all ingestion records for the given user.
+        Returns None if no record is found.
+        """
+        return self.repo.get_all_ingestions_by_user_id(user_id)
 
     # ── background pipeline ───────────────────────────────────────────────────
 

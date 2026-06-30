@@ -19,7 +19,7 @@ class IngestionStatus(str, Enum):
 class IngestionResponse(BaseModel):
     id: UUID
     file_url: str
-    json_url: Optional[str] = None
+    json_url: str = ""
     status: IngestionStatus
     chunk_count: Optional[int] = None
     created_at: datetime
