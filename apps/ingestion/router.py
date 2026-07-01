@@ -143,3 +143,23 @@ async def download_ingestion(
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/delete")
+async def delete_ingestion(
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user),
+    ingestion_id: str|None = Query(None, description="The ID of the ingestion record to delete")
+):
+    try:
+        if not ingestion_id:
+            IngestionService(db).delete_all_ingestion_records(user_id)
+            return {"message": "All ingestion records deleted successfully"}
+
+        record = IngestionService(db).get_ingestion_record_by_id(ingestion_id, user_id)
+        if not record:
+            raise HTTPException(status_code=404, detail="No ingestion record found for the user")
+        IngestionService(db).delete_ingestion_record_by_id(record.id)
+        return {"message": f"Ingestion record {record.id} deleted successfully"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

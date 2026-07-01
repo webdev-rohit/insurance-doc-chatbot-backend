@@ -428,6 +428,37 @@ class IngestionService:
 
         return zip_buffer
 
+    @logOperation
+    def delete_all_ingestion_records(self, user_id: str) -> None:
+        """
+        Delete all ingestion records for the given user.
+        Raises HTTPException if no records are found.
+        """
+        records = self.repo.get_all_ingestions_by_user_id(user_id)
+        if not records:
+            raise HTTPException(status_code=404, detail="No ingestion records found for the user")
+
+        for record in records:
+            self.repo.delete_chunks_by_ingestion_id(record.id)
+            self.db.delete(record)
+
+        self.db.commit()
+
+    @logOperation
+    def delete_ingestion_record_by_id(self, ingestion_id: str) -> None:
+        """
+        Delete a specific ingestion record by ID.
+        Raises HTTPException if the record is not found.
+        """
+        record = self.repo.get_by_id(ingestion_id)
+        if not record:
+            raise HTTPException(status_code=404, detail="Ingestion record not found")
+
+        self.repo.delete_chunks_by_ingestion_id(record.id)
+        self.db.delete(record)
+        
+        self.db.commit()
+
     # ── background pipeline ───────────────────────────────────────────────────
 
     def _run_pipeline(
