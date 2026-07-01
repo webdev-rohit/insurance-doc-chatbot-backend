@@ -17,7 +17,7 @@ def get_current_user(
 # Custom decorator for logging function operations in the application
 def logOperation(func):
     def wrapper(*args, **kwargs):
-        print(f"Executing {func.__name__} function with arguments: {args} and keyword arguments: {kwargs}")
+        print(f"\n---Executing {func.__name__} function -----")
         result = func(*args, **kwargs)
         return result
     return wrapper
