@@ -22,6 +22,8 @@ import pdfplumber
 from fastapi import HTTPException
 from google.cloud import storage
 from sqlalchemy.orm import Session
+from io import BytesIO
+from zipfile import ZipFile
 from vertexai.language_models import TextEmbeddingInput, TextEmbeddingModel
 
 from apps.auth.repository import AuthRepository
@@ -33,6 +35,7 @@ from .chunker import chunk_document
 from .models import Chunk, Ingestion
 from .repository import IngestionRepository
 from .schemas import IngestionStatus
+from .utils import download_file
 
 logger = logging.getLogger(__name__)
 
@@ -402,6 +405,28 @@ class IngestionService:
         Returns None if no record is found.
         """
         return self.repo.get_all_ingestions_by_user_id(user_id)
+    
+    @logOperation
+    def download_ingestion_files(self, ingestion_id: str) -> BytesIO:
+        """
+        Download the PDF and JSON files for the given ingestion record as a ZIP.
+        Raises HTTPException if the record is not found.
+        """
+        record = self.repo.get_by_id(ingestion_id)
+        if not record:
+            raise HTTPException(status_code=404, detail="Ingestion record not found")
+
+        pdf_file = download_file(record.file_url)
+        json_file = download_file(record.json_url)
+
+        zip_buffer = BytesIO()
+        with ZipFile(zip_buffer, "w") as zip_file:
+            zip_file.writestr(Path(record.file_url).name, pdf_file.getvalue())
+            zip_file.writestr(Path(record.json_url).name, json_file.getvalue())
+
+        zip_buffer.seek(0)
+
+        return zip_buffer
 
     # ── background pipeline ───────────────────────────────────────────────────
 

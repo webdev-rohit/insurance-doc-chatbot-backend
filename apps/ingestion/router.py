@@ -1,7 +1,8 @@
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, UploadFile
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
-from .schemas import IngestionResponse, IngestionStatusResponse
+from .schemas import IngestionResponse, IngestionStatusResponse, IngestionStatus
 from .services import IngestionService, run_ingestion_pipeline
 from apps.core.database import get_db
 from apps.core.global_utils import get_current_user
@@ -108,5 +109,37 @@ async def show_ingestion_record(
                 )
             ]
 
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/download")
+async def download_ingestion(
+    db: Session = Depends(get_db),
+    user_id: str = Depends(get_current_user),
+    ingestion_id: str|None = Query(None, description="The ID of the ingestion record to download")
+):
+    try:
+        if not ingestion_id:
+            record = IngestionService(db).get_latest_ingestion_record(user_id)
+        else:
+            record = IngestionService(db).get_ingestion_record_by_id(ingestion_id, user_id)
+
+        if not record:
+            raise HTTPException(status_code=404, detail="No ingestion record found for the user")
+
+        if record.status != IngestionStatus.COMPLETED:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Ingestion is not completed (current status: {record.status})"
+            )
+        else:
+            zip_buffer = IngestionService(db).download_ingestion_files(record.id)
+            # We need StreamingResponse to stream the zip file back to the client
+            return StreamingResponse(
+                zip_buffer,
+                media_type="application/zip",
+                headers={"Content-Disposition": 'attachment; filename="ingestion.zip"'},
+            )
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
