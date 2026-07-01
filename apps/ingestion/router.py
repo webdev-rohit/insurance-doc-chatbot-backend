@@ -45,6 +45,8 @@ async def ingest_data(
             created_at=record.created_at,
         )
     
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -108,7 +110,9 @@ async def show_ingestion_record(
                     created_at=record.created_at,
                 )
             ]
-
+    
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -132,15 +136,16 @@ async def download_ingestion(
                 status_code=400,
                 detail=f"Ingestion is not completed (current status: {record.status})"
             )
-        else:
-            zip_buffer = IngestionService(db).download_ingestion_files(record.id)
-            # We need StreamingResponse to stream the zip file back to the client
-            return StreamingResponse(
-                zip_buffer,
-                media_type="application/zip",
-                headers={"Content-Disposition": 'attachment; filename="ingestion.zip"'},
-            )
-        
+
+        zip_buffer = IngestionService(db).download_ingestion_files(record.id)
+        return StreamingResponse(
+            zip_buffer,
+            media_type="application/zip",
+            headers={"Content-Disposition": 'attachment; filename="ingestion.zip"'},
+        )
+
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
@@ -161,5 +166,7 @@ async def delete_ingestion(
         IngestionService(db).delete_ingestion_record_by_id(record.id)
         return {"message": f"Ingestion record {record.id} deleted successfully"}
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
