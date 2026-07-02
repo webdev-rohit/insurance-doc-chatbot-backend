@@ -10,6 +10,8 @@ from apps.core.database import get_engine
 # Add a new import here whenever you create a new models.py file.
 import apps.auth.models  # noqa: F401
 import apps.ingestion.models  # noqa: F401
+import apps.chat.models  # noqa: F401
+import apps.query.models  # noqa: F401
 
 config = context.config
 
