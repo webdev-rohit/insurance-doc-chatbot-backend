@@ -1,10 +1,18 @@
-import vertexai
-from vertexai.language_models import TextEmbeddingModel
+from functools import lru_cache
+from google import genai
 
 from apps.core.config import settings
 
-def get_embed_model(self) -> TextEmbeddingModel:
-    if self._embed_model is None:
-        vertexai.init(project=settings.project_id, location=settings.region)
-        self._embed_model = TextEmbeddingModel.from_pretrained(settings.embedding_model_name)
-    return self._embed_model
+
+@lru_cache(maxsize=1)
+def get_genai_client() -> genai.Client:
+    """
+    Single shared client for both LLM and embedding calls.
+    Replaces vertexai.init() + separate model instantiation.
+    Cached — only created once for the lifetime of the app.
+    """
+    return genai.Client(
+        vertexai=True,
+        project=settings.project_id,
+        location=settings.region,
+    )

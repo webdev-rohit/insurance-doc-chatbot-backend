@@ -20,12 +20,12 @@ from google.cloud import storage
 from sqlalchemy.orm import Session
 from io import BytesIO
 from zipfile import ZipFile
-from vertexai.language_models import TextEmbeddingInput, TextEmbeddingModel
+from google.genai import types
 
 from apps.auth.repository import AuthRepository
 from apps.core.config import settings
 from apps.core.global_utils import logOperation
-from apps.core.ai_models import get_embed_model
+from apps.core.ai_models import get_genai_client
 from apps.core.database import SessionLocal
 from .chunker import chunk_document
 from .models import Chunk, Ingestion
@@ -49,7 +49,6 @@ class IngestionService:
         self.db = db
         self.repo = IngestionRepository(db)
         self._bucket = storage.Client().bucket(settings.gcs_bucket_name)
-        self._embed_model: Optional[TextEmbeddingModel] = None
 
     def upload_file_to_gcs(self, path: Path, key: str, content_type: str) -> str:
         """
@@ -64,18 +63,22 @@ class IngestionService:
         Gets embeddings for a list of texts using the Vertex AI embedding model.
         Returns a list of embedding vectors.
         """
-        model = get_embed_model(self)
+        client = get_genai_client()
         vectors: list[list[float]] = []
+
         for i in range(0, len(texts), settings.embedding_batch_size):
             batch = texts[i : i + settings.embedding_batch_size]
-            inputs = [
-                TextEmbeddingInput(text=t, task_type="RETRIEVAL_DOCUMENT")
-                for t in batch
-            ]
-            results = model.get_embeddings(
-                inputs, output_dimensionality=settings.embedding_output_dimensionality, auto_truncate=True
+
+            response = client.models.embed_content(
+                model=settings.embedding_model_name,
+                contents=batch,
+                config=types.EmbedContentConfig(
+                    task_type="RETRIEVAL_DOCUMENT",
+                    output_dimensionality=settings.embedding_output_dimensionality,
+                ),
             )
-            vectors.extend(r.values for r in results)
+            vectors.extend(e.values for e in response.embeddings)
+
         return vectors
 
     @staticmethod
