@@ -44,6 +44,9 @@ class Settings(BaseSettings):
     embedding_model_name: str
     embedding_output_dimensionality: int
     embedding_batch_size: int
+    llm_name: str
+    llm_temperature: float
+    llm_max_output_tokens: int
 
     # PDF file input settings
     allowed_content_types: set[str]

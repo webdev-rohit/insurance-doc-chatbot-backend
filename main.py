@@ -5,6 +5,7 @@ import uvicorn
 from apps.core.config import settings
 from apps.auth.router import router as auth_router
 from apps.ingestion.router import router as ingestion_router
+from apps.query.router import router as query_router
 
 app = FastAPI(
     title=settings.app_name,
@@ -14,6 +15,7 @@ app = FastAPI(
 # Include the imported routers
 app.include_router(auth_router)
 app.include_router(ingestion_router)
+app.include_router(query_router)
 
 # Add CORS middleware; origins from settings (env CORS_ORIGINS, comma-separated)
 app.add_middleware(
